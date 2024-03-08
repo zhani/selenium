@@ -26,6 +26,7 @@ class Options(ArgOptions):
         super().__init__()
         self._binary_location = ""
         self._overlay_scrollbars_enabled = True
+        self._taget_address = None
 
     @property
     def binary_location(self) -> str:
@@ -56,6 +57,23 @@ class Options(ArgOptions):
         """
         self._overlay_scrollbars_enabled = value
 
+    property
+    def taget_address(self) -> str:
+        """:Returns: The address of the remote inspector instance."""
+        return self._taget_address
+
+    @taget_address.setter
+    def taget_address(self, value: str) -> None:
+        """Allows you to set the address of the remote inspector instance that
+        the WebKitWebDriver instance will try to connect to during an active wait.
+
+        :Args:
+         - value: address of remote inspector instance if any (hostname[:port])
+        """
+        if not isinstance(value, str):
+            raise TypeError("Target Address must be a string")
+        self._taget_address = value
+
     def to_capabilities(self):
         """Creates a capabilities with all the options that have been set and
         returns a dictionary with everything."""
@@ -67,6 +85,8 @@ class Options(ArgOptions):
         if self.arguments:
             browser_options["args"] = self.arguments
         browser_options["useOverlayScrollbars"] = self.overlay_scrollbars_enabled
+        if self.taget_address:
+            browser_options["targetAddress"] = self.taget_address
 
         caps[Options.KEY] = browser_options
 

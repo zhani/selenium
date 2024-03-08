@@ -69,6 +69,12 @@ def pytest_addoption(parser):
         help="arguments to start the browser with",
     )
     parser.addoption(
+        '--browser-debugger-address',
+        action='store',
+        dest='debugger_address',
+        help="Address of the remote browser debugger instance that WebDriver"
+        "instance will try to connect to during an active wait')
+    parser.addoption(
         "--headless",
         action="store",
         dest="headless",
@@ -166,6 +172,7 @@ def driver(request):
 def get_options(driver_class, config):
     browser_path = config.option.binary
     browser_args = config.option.args
+    debugger_address = config.option.debugger_address
     headless = bool(config.option.headless)
     options = None
 
@@ -177,11 +184,17 @@ def get_options(driver_class, config):
             options = getattr(webdriver, f"{driver_class}Options")()
         if driver_class == "WebKitGTK":
             options.overlay_scrollbars_enabled = False
+        if driver_class in ['WPEWebKit', 'WebKitGTK']:
+            options.set_capability("browserName", os.path.basename(browser_path))
         if browser_path is not None:
             options.binary_location = browser_path
         if browser_args is not None:
             for arg in browser_args.split():
                 options.add_argument(arg)
+
+    if debugger_address:
+        if driver_class in ['WPEWebKit', 'WebKitGTK']:
+            options.target_address = debugger_address
 
     if headless:
         if not options:

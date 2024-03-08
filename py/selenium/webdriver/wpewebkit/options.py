@@ -26,6 +26,7 @@ class Options(ArgOptions):
     def __init__(self) -> None:
         super().__init__()
         self._binary_location = ""
+        self._taget_address = None
 
     @property
     def binary_location(self) -> str:
@@ -44,6 +45,23 @@ class Options(ArgOptions):
             raise TypeError(self.BINARY_LOCATION_ERROR)
         self._binary_location = value
 
+    property
+    def taget_address(self) -> str:
+        """:Returns: The address of the remote inspector instance."""
+        return self._taget_address
+
+    @taget_address.setter
+    def taget_address(self, value: str) -> None:
+        """Allows you to set the address of the remote inspector instance that
+        the WPEWebDriver instance will try to connect to during an active wait.
+
+        :Args:
+         - value: address of remote inspector instance if any (hostname[:port])
+        """
+        if not isinstance(value, str):
+            raise TypeError("Target Address must be a string")
+        self._taget_address = value
+
     def to_capabilities(self):
         """Creates a capabilities with all the options that have been set and
         returns a dictionary with everything."""
@@ -54,6 +72,8 @@ class Options(ArgOptions):
             browser_options["binary"] = self.binary_location
         if self.arguments:
             browser_options["args"] = self.arguments
+        if self.taget_address:
+            browser_options["targetAddress"] = self.taget_address
 
         caps[Options.KEY] = browser_options
 
